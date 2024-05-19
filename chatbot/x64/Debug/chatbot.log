@@ -1,0 +1,2 @@
+﻿  chatbot.cpp
+C:\Users\user\source\repos\chatbot\chatbot.cpp(1,10): error C1083: Не удается открыть файл включение: crow.h: No such file or directory,
