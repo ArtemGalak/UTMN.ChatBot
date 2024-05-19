@@ -1,6 +1,6 @@
-﻿#include "crow.h"
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 std::string generate_response(const std::string& user_message) {
     std::string message_lower = user_message;
@@ -24,22 +24,19 @@ std::string generate_response(const std::string& user_message) {
 }
 
 int main() {
-    crow::SimpleApp app;
+    setlocale(LC_ALL, "Russian");
+    std::string user_message;
+    std::cout << "Добро пожаловать в чат-бот университета. Введите ваше сообщение:" << std::endl;
 
-    CROW_ROUTE(app, "/chatbot").methods(crow::HTTPMethod::Post)([](const crow::request& req) {
-        auto x = crow::json::load(req.body);
-        if (!x) {
-            return crow::response(400);
+    while (true) {
+        std::getline(std::cin, user_message);
+        if (user_message == "выход" || user_message == "exit") {
+            std::cout << "До свидания!" << std::endl;
+            break;
         }
-
-        std::string user_message = x["message"].s();
         std::string response_message = generate_response(user_message);
+        std::cout << response_message << std::endl;
+    }
 
-        crow::json::wvalue response;
-        response["response"] = response_message;
-
-        return crow::response(response);
-        });
-
-    app.port(18080).multithreaded().run();
+    return 0;
 }
