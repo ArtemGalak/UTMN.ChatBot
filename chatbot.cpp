@@ -44,9 +44,9 @@ public:
     BotT9() {
         // это файлы-группы для Т9
         
-        loadFiles("study.txt");
         //loadFiles("uni.txt"); - Этот файл ещё не готов
-        loadFiles("stepend.txt");
+        loadFiles("BotFiles/FilesT9/study.txt");
+        loadFiles("BotFiles/FilesT9/stepend.txt");
     }
 
     void loadFiles(const string& filename) {
@@ -140,7 +140,7 @@ class FuncBot {
 public:
     FuncBot() {
         // Считываем специальные функции бота из файла
-        ifstream file("FuncNames.txt");
+        ifstream file("BotFiles/FuncNames.txt");
         if (file.is_open()) {
             string funcName;
             while (getline(file, funcName)) {
