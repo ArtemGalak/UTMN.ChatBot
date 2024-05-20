@@ -22,19 +22,30 @@ string generate_response(const string& user_message) {
     else if (message_lower.find("course") != string::npos) {
         return "Наш университет предлагает широкий спектр курсов. Подробности вы можете найти на нашем сайте в разделе 'Курсы'.";
     }
-    else if (message_lower.find("paid") != string::npos || message_lower.find("stepend") != string::npos) {
+    else if (message_lower.find("pay") != string::npos || message_lower.find("stepend") != string::npos) {
         return "Информация о стипендиях доступна в разделе 'Стипендии' на нашем сайте.";
     }
     else if (message_lower.find("help") != string::npos) {
-        return "Да, конечно, я помогу вам.";
+        return "Вы можете задать мне вопрос, на котороый я постараюсь ответить.";
     }
     else if (message_lower.find("bot") != string::npos) {
         return "Бот работает!))";
+    }
+    else if (message_lower.find("mail") != string::npos) {
+        return "Вы можете отрпавить письмо с вашим вопросом на официальную почту Единого Деканата 'EDmail.com'";
+    }
+    else if (message_lower.find("call") != string::npos) {
+        return "Если у вас остались вопросы или возникли трудности вы можете позвонить \
+ на офмцмльный номер Единого Деканата +7 (495) 76-54-321";
     }
     else {
         return "UTMN_Bot: Вы всегда можете воспользоваться моей специальной командой 'help'.";
     }
 }
+//  ^
+//  |
+// нужно сделать вывод ответа бота по скрипту из файла
+// пока он это делает вручную и криво
 
 class BotT9 {
 private:
@@ -44,7 +55,7 @@ public:
     BotT9() {
         // это файлы-группы для Т9
         
-        //loadFiles("uni.txt"); - Этот файл ещё не готов
+        loadFiles("BotFiles/FilesT9/uni.txt");// - Этот файл ещё не готов
         loadFiles("BotFiles/FilesT9/study.txt");
         loadFiles("BotFiles/FilesT9/stepend.txt");
     }
@@ -98,6 +109,9 @@ public:
     bool isSimilar(string s1, string s2) {
         int n = s1.length();
         int m = s2.length();
+
+        //cout << s1 << endl;// - это проверка, после правки бага с русским языком эти строчки можно убрать
+        //cout << s2 << endl;
 
         if (abs(n - m) > 1)
             return false;
@@ -163,13 +177,14 @@ public:
 
 int main() {
     setlocale(LC_ALL, "Russian");
+    setlocale(LC_CTYPE, "");
 
     FuncBot objFuncBot;
     BotT9 bot;
 
 
     cout << "UTMN_Bot: Добро пожаловать в чат-бот университета. Как я могу вам помочь?" << endl;
-    cout << "UTMN_Bot: Вы можете воспользоваться моими специальными функциями:" << endl;
+    cout << "Вы можете воспользоваться моими специальными функциями:" << endl;
     objFuncBot.botfunc(); // Использование специальной функции бота
 
     string user_message;
@@ -188,5 +203,5 @@ int main() {
     return 0;
 }
 
-/// Пожалуйста, используйте этот счётчик при каждом нахождении бага: 4
-/// А это будет счётчик всех неудачных попыток запуска: 23
+
+/// Это будет счётчик всех неудачных попыток запуска: 25
