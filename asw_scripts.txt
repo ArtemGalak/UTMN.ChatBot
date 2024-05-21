@@ -1,0 +1,8 @@
+hi - Hello! How can I help you today?
+uni - You can contact the admissions office by phone at +7 (495) 123-45-67 or by email at admission@university.ru.
+course - Our university offers a wide range of courses. Details can be found on our website under 'Courses' section.
+pay - Information about scholarships is available in the 'Scholarships' section on our website.
+help - Feel free to ask me a question, and I will do my best to answer it.
+bot - The bot is working!))
+mail - You can send an email with your question to the official Unified Dean's Office mail 'EDmail.com'.
+call - If you have any questions or encounter difficulties, you can call the official number of the Unified Dean's Office at +7 (495) 76-54-321.
