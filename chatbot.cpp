@@ -4,43 +4,43 @@
 #include <stack>
 #include <fstream>
 #include <unordered_map>
+#include <locale>
 
 using namespace std;
 
-string generate_response(const string& user_message) {
+unordered_map<string, string> loadResponses(const string& filename) {
+    unordered_map<string, string> responses;
+    ifstream file(filename);
+    if (file.is_open()) {
+        string line;
+        while (getline(file, line)) {
+            size_t delimiter_pos = line.find(" - ");
+            if (delimiter_pos != string::npos) {
+                string keyword = line.substr(0, delimiter_pos);
+                string response = line.substr(delimiter_pos + 3);
+                transform(keyword.begin(), keyword.end(), keyword.begin(), ::tolower);
+                responses[keyword] = response;
+            }
+        }
+        file.close();
+    }
+    else {
+        cerr << "Ошибка открытия файла " << filename << '\n';
+    }
+    return responses;
+}
+
+string generate_response(const string& user_message, const unordered_map<string, string>& responses) {
     string message_lower = user_message;
     transform(message_lower.begin(), message_lower.end(), message_lower.begin(), ::tolower);
 
-    cout << "UTMN_Bot: ";
+    for (const auto& pair : responses) {
+        if (message_lower.find(pair.first) != string::npos) {
+            return pair.second;
+        }
+    }
 
-    if (message_lower.find("hi") != string::npos || message_lower.find("hello") != string::npos) {
-        return "Здравствуйте! Как я могу помочь вам сегодня?";
-    }
-    else if (message_lower.find("uni") != string::npos) {
-        return "Вы можете связаться с приемной комиссией по телефону +7 (495) 123-45-67 или по электронной почте admission@university.ru.";
-    }
-    else if (message_lower.find("course") != string::npos) {
-        return "Наш университет предлагает широкий спектр курсов. Подробности вы можете найти на нашем сайте в разделе 'Курсы'.";
-    }
-    else if (message_lower.find("pay") != string::npos || message_lower.find("stepend") != string::npos) {
-        return "Информация о стипендиях доступна в разделе 'Стипендии' на нашем сайте.";
-    }
-    else if (message_lower.find("help") != string::npos) {
-        return "Вы можете задать мне вопрос, на котороый я постараюсь ответить.";
-    }
-    else if (message_lower.find("bot") != string::npos) {
-        return "Бот работает!))";
-    }
-    else if (message_lower.find("mail") != string::npos) {
-        return "Вы можете отрпавить письмо с вашим вопросом на официальную почту Единого Деканата 'EDmail.com'";
-    }
-    else if (message_lower.find("call") != string::npos) {
-        return "Если у вас остались вопросы или возникли трудности вы можете позвонить \
- на офмцмльный номер Единого Деканата +7 (495) 76-54-321";
-    }
-    else {
-        return "UTMN_Bot: Вы всегда можете воспользоваться моей специальной командой 'help'.";
-    }
+    return "UTMN_Bot: Вы всегда можете воспользоваться моей специальной командой 'help'.";
 }
 //  ^
 //  |
@@ -101,9 +101,9 @@ public:
             }
         }
 
-        if (!found) {
-            cerr << "Извините, я не понимаю ваш запрос. Пожалуйста, задайте вопрос по - другому.\n"; // Надо ещё доработать штатные фразы
-        }
+        //if (!found) {
+            //cerr << "Извините, я не понимаю ваш запрос. Пожалуйста, задайте вопрос по - другому.\n";  Надо ещё доработать штатные фразы
+        //}
     }
 
     bool isSimilar(string s1, string s2) {
@@ -119,7 +119,7 @@ public:
         int count = 0;
 
         for (int i = 0, j = 0; i < n && j < m;) {
-            if (s1[i] != s2[j]) { // надо ещё доделать эту проверку т.к пользователь может пропустить букву в слове
+            if (s1[i] != s2[j]) {
                 count++;
                 if (count > 1) { // Пользователь допустил ошибку в слове (при чём различие может быть лишь в 1 символ)
                     return false;
@@ -128,7 +128,7 @@ public:
                     i++;
                     j++;
                 }
-                else if (n > m) { // Учитываем различие в длине строк
+                else if (n > (m + 1)) { // Учитываем различие в длине строк
                     i++;
                 }
                 else {
@@ -182,6 +182,8 @@ int main() {
     FuncBot objFuncBot;
     BotT9 bot;
 
+    string responses_file = "asw_scripts.txt";
+    unordered_map<string, string> responses = loadResponses(responses_file);
 
     cout << "UTMN_Bot: Добро пожаловать в чат-бот университета. Как я могу вам помочь?" << endl;
     cout << "Вы можете воспользоваться моими специальными функциями:" << endl;
@@ -196,7 +198,7 @@ int main() {
             break;
         }
         bot.findSimilarWords(user_message);
-        string response_message = generate_response(user_message);
+        string response_message = generate_response(user_message, responses);
         cout << response_message << endl;
     }
 
@@ -204,4 +206,4 @@ int main() {
 }
 
 
-/// Это будет счётчик всех неудачных попыток запуска: 25
+/// Это будет счётчик всех неудачных попыток запуска: 27
