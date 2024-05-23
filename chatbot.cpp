@@ -1,3 +1,5 @@
+#define CROW_MAIN
+#include "crow_all.h"
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -5,6 +7,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <locale>
+#include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -30,6 +34,25 @@ unordered_map<string, string> loadResponses(const string& filename) {
     return responses;
 }
 
+void handleRequest(const crow::request& req, crow::response& res) {
+    unordered_map<string, string> responses = loadResponses("asw_scripts.txt");
+
+    if (req.url == "/get_response") {
+        auto it = responses.find(req.url_params.get("keyword"));
+        if (it != responses.end()) {
+            res.write(it->second);
+        }
+        else {
+            res.code = 404;
+            res.write("Response not found");
+        }
+    }
+    else {
+        res.code = 404;
+        res.write("Not Found");
+    }
+}
+
 string generate_response(const string& user_message, const unordered_map<string, string>& responses) {
     string message_lower = user_message;
     transform(message_lower.begin(), message_lower.end(), message_lower.begin(), ::tolower);
@@ -40,12 +63,8 @@ string generate_response(const string& user_message, const unordered_map<string,
         }
     }
 
-    return "UTMN_Bot: Вы всегда можете воспользоваться моей специальной командой 'help'.";
+    return "UTMN_Bot: You always can use my special function 'help'.";
 }
-//  ^
-//  |
-// нужно сделать вывод ответа бота по скрипту из файла
-// пока он это делает вручную и криво
 
 class BotT9 {
 private:
@@ -53,9 +72,7 @@ private:
 
 public:
     BotT9() {
-        // это файлы-группы для Т9
-        
-        loadFiles("BotFiles/FilesT9/uni.txt");// - Этот файл ещё не готов
+        loadFiles("BotFiles/FilesT9/uni.txt");
         loadFiles("BotFiles/FilesT9/study.txt");
         loadFiles("BotFiles/FilesT9/stepend.txt");
     }
@@ -65,13 +82,12 @@ public:
 
         if (file.is_open()) {
             string word;
-            while (file >> word) { // Считываем каждое слово отдельно
+            while (file >> word) {
                 for (auto& c : word) {
-                    c = tolower(c); // Приводим к нижнему регистру
+                    c = tolower(c);
                 }
                 fileWordMap[filename].push_back(word);
             }
-            // чтение производиться столбцом
             file.close();
         }
         else {
@@ -79,7 +95,8 @@ public:
         }
     }
 
-    void findSimilarWords(const string& user_message) {
+    string findSimilarWords(const string& user_message) {
+        string result = "Sorry, now I can't understand your message.\n";
         bool found = false;
 
         for (const auto& pair : fileWordMap) {
@@ -88,30 +105,23 @@ public:
             for (const auto& word : wordsList) {
                 if (isSimilar(user_message, word)) {
                     found = true;
-
-                    // Выводим все слова из списка, кроме найденного (а зачем нам найденное? =) )
-                    cout << "UTMN_Bot: Вам может подойти другие варианты, которые представленны ниже" << endl;
+                    result = "Maybe these themes will be interesting for you:\n";
                     for (const auto& w : wordsList) {
-                        if (w != word) {
-                            cout << w << endl;
-                        }
+                        result += w + "\n";
                     }
                     break;
                 }
             }
+
+            if (found) break;
         }
 
-        //if (!found) {
-            //cerr << "Извините, я не понимаю ваш запрос. Пожалуйста, задайте вопрос по - другому.\n";  Надо ещё доработать штатные фразы
-        //}
+        return result;
     }
 
     bool isSimilar(string s1, string s2) {
         int n = s1.length();
         int m = s2.length();
-
-        //cout << s1 << endl;// - это проверка, после правки бага с русским языком эти строчки можно убрать
-        //cout << s2 << endl;
 
         if (abs(n - m) > 1)
             return false;
@@ -121,14 +131,14 @@ public:
         for (int i = 0, j = 0; i < n && j < m;) {
             if (s1[i] != s2[j]) {
                 count++;
-                if (count > 1) { // Пользователь допустил ошибку в слове (при чём различие может быть лишь в 1 символ)
+                if (count > 1) {
                     return false;
                 }
                 if (n == m) {
                     i++;
                     j++;
                 }
-                else if (n > (m + 1)) { // Учитываем различие в длине строк
+                else if (n > m) {
                     i++;
                 }
                 else {
@@ -141,11 +151,10 @@ public:
             }
         }
 
-        count += abs(n - m); // Учитываем разницу длин
+        count += abs(n - m);
 
-        return count <= 1; // Разрешаем до одной ошибки
+        return count <= 1;
     }
-
 };
 
 class FuncBot {
@@ -153,7 +162,6 @@ class FuncBot {
 
 public:
     FuncBot() {
-        // Считываем специальные функции бота из файла
         ifstream file("BotFiles/FuncNames.txt");
         if (file.is_open()) {
             string funcName;
@@ -167,11 +175,13 @@ public:
         }
     }
 
-    void botfunc() {
+    string botfunc() {
+        string result = "You always can use my special functions:\n";
         while (!lfunc.empty()) {
-            cout << "Специальная функция бота: " << lfunc.top() << endl;
+            result += lfunc.top() + "\n";
             lfunc.pop();
         }
+        return result;
     }
 };
 
@@ -185,25 +195,75 @@ int main() {
     string responses_file = "asw_scripts.txt";
     unordered_map<string, string> responses = loadResponses(responses_file);
 
-    cout << "UTMN_Bot: Добро пожаловать в чат-бот университета. Как я могу вам помочь?" << endl;
-    cout << "Вы можете воспользоваться моими специальными функциями:" << endl;
-    objFuncBot.botfunc(); // Использование специальной функции бота
+    crow::SimpleApp app;
 
-    string user_message;
+    CROW_ROUTE(app, "/get_response").methods("GET"_method)(handleRequest);
+    CROW_ROUTE(app, "/")([&responses, &bot, &objFuncBot] {
+        ostringstream os;
+        os << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "<head>\n"
+            << "    <meta charset=\"UTF-8\">\n"
+            << "    <title>UTMN_Bot Chat</title>\n"
+            << "    <style>\n"
+            << "        body { font-family: Arial, sans-serif; margin: 20px; }\n"
+            << "        #chat { border: 1px solid #ccc; padding: 10px; width: 300px; height: 400px; overflow-y: scroll; }\n"
+            << "        #user_input { width: 240px; }\n"
+            << "    </style>\n"
+            << "</head>\n"
+            << "<body>\n"
+            << "    <h1>UTMN_Bot Chat</h1>\n"
+            << "    <div id=\"chat\">\n"
+            << "        <div>UTMN_Bot: Welcome, I'm UTMN_Bot. How can I help you?</div>\n"
+            //<< "        <div>UTMN_Bot: " << objFuncBot.botfunc() << "</div>\n"
+            << "        <div>UTMN_Bot: If you need my help, please, text me 'help'.</div>\n"
+            << "    </div>\n"
+            << "    <input type=\"text\" id=\"user_input\" placeholder=\"Text message here\" />\n"
+            << "    <button onclick=\"sendMessage()\">Send message</button>\n"
+            << "    <script>\n"
+            << "        function sendMessage() {\n"
+            << "            var userMessage = document.getElementById('user_input').value;\n"
+            << "            var chat = document.getElementById('chat');\n"
+            << "            var userMessageDiv = document.createElement('div');\n"
+            << "            userMessageDiv.textContent = 'You: ' + userMessage;\n"
+            << "            chat.appendChild(userMessageDiv);\n"
+            << "            fetch('/chat', {\n"
+            << "                method: 'POST',\n"
+            << "                headers: {\n"
+            << "                    'Content-Type': 'application/json'\n"
+            << "                },\n"
+            << "                body: JSON.stringify({ message: userMessage })\n"
+            << "            }).then(response => response.json())\n"
+            << "              .then(data => {\n"
+            << "                var botMessageDiv = document.createElement('div');\n"
+            << "                botMessageDiv.textContent = 'UTMN_Bot: ' + data.response;\n"
+            << "                chat.appendChild(botMessageDiv);\n"
+            << "                document.getElementById('user_input').value = '';\n"
+            << "            });\n"
+            << "        }\n"
+            << "    </script>\n"
+            << "</body>\n"
+            << "</html>";
+        return crow::response(os.str());
+        });
 
-    while (true) {
-        getline(cin, user_message);
-        if (user_message == "выход" || user_message == "exit" || user_message == "пока") {
-            cout << "UTMN_Bot: До свидания!" << endl;
-            break;
-        }
-        bot.findSimilarWords(user_message);
+    CROW_ROUTE(app, "/chat").methods("POST"_method)([&responses, &bot, &objFuncBot](const crow::request& req) {
+        auto x = crow::json::load(req.body);
+        if (!x)
+            return crow::response(400);
+        string user_message = x["message"].s();
+
+        //objFuncBot.botfunc();
+
         string response_message = generate_response(user_message, responses);
-        cout << response_message << endl;
-    }
+        string similar_words_message = bot.findSimilarWords(user_message);
+        if (response_message == "UTMN_Bot: You always can use my special function 'help'.") {
+            response_message += "\n" + similar_words_message;
+        }
+        crow::json::wvalue response;
+        response["response"] = response_message;
+        return crow::response(response);
+        });
 
-    return 0;
+    app.bindaddr("127.0.0.1").port(18080).multithreaded().run();
 }
-
-
-/// Это будет счётчик всех неудачных попыток запуска: 27
