@@ -1,8 +1,30 @@
 hi - Hello! How can I help you today?
+hello - Hello! How can I help you today?
 uni - You can contact the admissions office by phone at +7 (495) 123-45-67 or by email at admission@university.ru.
-course - Our university offers a wide range of courses. Details can be found on our website under 'Courses' section.
+courses - Our university offers a wide range of courses. Details can be found on our website under 'Courses' section.
 pay - Information about scholarships is available in the 'Scholarships' section on our website.
-help - Feel free to ask me a question, and I will do my best to answer it.
+help - Please, ask me about ssomething you are interested in and I try my best to give you an answer.
 bot - The bot is working!))
 mail - You can send an email with your question to the official Unified Dean's Office mail 'EDmail.com'.
 call - If you have any questions or encounter difficulties, you can call the official number of the Unified Dean's Office at +7 (495) 76-54-321.
+stipendiya - In our uinvercity we pay our students for high marks. Try your best!
+salary_theachers - Out teahcers salary you can know on our website in the 'For theachers' section.
+job - If you want to work in the UTMN, please call +7 (495) 123-45-67 or come to our office on Lenina 23.
+career - In UTMN you have big chances to have a great career in different subjects.
+online- If you want to have an online studing in UTMN, you can read the information on our website in the 'Online studing' section.
+bachelor - If you are a pupil and want to study in th UTMN. You can read the information on our website in the 'For abituryents' section.
+UTMN - UTMN is the best university in whole all over the World.
+headquaters - Our principal is Romanchuk. He is the profecional. You can contact our principal by phone at +7 (495) 111-11-11.
+buildings - UTMN has many buildings, where all students can learn.
+movements - During your studying you can take part in some student's movement if you want.
+modeus - Modeus is a UTMN's system for student? which help you always to know your shedule.
+foreign- UTMN has a lot of foreign partners all over the world.
+exam - You can find entrance exams for admission on our website.
+diplom - After graduation in UTMN, you will be able to receive a diplom in your field of study.
+certification - UTMN can provide you a certificate of English speaking level.
+academic leave - You can take an academic leave if you need to stop studying in the UTMn for half a year.
+education - Usually education in the UTMN longs for 4-5 years.
+master’s degree - After achiving a bachelor’s degree you can get a master’s degree.
+specialist - Specialist degree is the highest level of education that you can get.
+military - If you want to have a military ticket without going in the army, you can study in the UTMN's military department.
+dormitory - You can send the documents for the domitory on our website.
