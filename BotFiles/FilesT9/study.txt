@@ -1,4 +1,10 @@
-bachalous
+bachelor’s degree
 courses
 UTMN
-Headquater
+Headquaters
+education
+exam
+diplom
+certification
+academic leave
+online_studing
