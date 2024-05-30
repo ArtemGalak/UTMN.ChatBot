@@ -1,10 +1,7 @@
-учёба
-бакалавриат
-магистратура
-специалитет
-аспирантура
-экзамен
-диплом
-аттестация
-военная кафедра
-академ. отпуск
+education
+bachelor’s degree
+master’s degree
+specialist degree
+military department at the university
+dormitory
+help 
