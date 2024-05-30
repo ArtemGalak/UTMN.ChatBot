@@ -12,6 +12,8 @@
 
 using namespace std;
 
+//первоначальное открытия файла и чтение всех скриптов, а уже потом в generate_response выбор нужного
+
 unordered_map<string, string> loadResponses(const string& filename) {
     unordered_map<string, string> responses;
     ifstream file(filename);
@@ -34,6 +36,7 @@ unordered_map<string, string> loadResponses(const string& filename) {
     return responses;
 }
 
+// функция для считывания нужного скрипта ответа бота из БД и его отправка
 void handleRequest(const crow::request& req, crow::response& res) {
     unordered_map<string, string> responses = loadResponses("asw_scripts.txt");
 
@@ -53,6 +56,7 @@ void handleRequest(const crow::request& req, crow::response& res) {
     }
 }
 
+// функция распознаёт запрос юзера, сравнивая его с скриптом из БД, и отправляет его дальше на опознание для Т9
 string generate_response(const string& user_message, const unordered_map<string, string>& responses) {
     string message_lower = user_message;
     transform(message_lower.begin(), message_lower.end(), message_lower.begin(), ::tolower);
@@ -75,8 +79,10 @@ public:
         loadFiles("BotFiles/FilesT9/uni.txt");
         loadFiles("BotFiles/FilesT9/study.txt");
         loadFiles("BotFiles/FilesT9/stepend.txt");
+        loadFiles("BotFiles/FilesT9/other.txt");
     }
 
+    //функция открытия файлов 
     void loadFiles(const string& filename) {
         ifstream file(filename);
 
@@ -102,6 +108,7 @@ public:
         for (const auto& pair : fileWordMap) {
             const auto& wordsList = pair.second;
 
+            // реализация Т9
             for (const auto& word : wordsList) {
                 if (isSimilar(user_message, word)) {
                     found = true;
@@ -119,7 +126,7 @@ public:
         return result;
     }
 
-    bool isSimilar(string s1, string s2) {
+    bool isSimilar(string s1, string s2) { // это проверка, если пользователь допустил ошибку в слове
         int n = s1.length();
         int m = s2.length();
 
@@ -131,7 +138,7 @@ public:
         for (int i = 0, j = 0; i < n && j < m;) {
             if (s1[i] != s2[j]) {
                 count++;
-                if (count > 1) {
+                if (count > 1) { // допускается лишь 1 ошибка или пропуск буквы, иначе бот не поймёт
                     return false;
                 }
                 if (n == m) {
@@ -157,48 +164,22 @@ public:
     }
 };
 
-class FuncBot {
-    stack<string> lfunc;
-
-public:
-    FuncBot() {
-        ifstream file("BotFiles/FuncNames.txt");
-        if (file.is_open()) {
-            string funcName;
-            while (getline(file, funcName)) {
-                lfunc.push(funcName);
-            }
-            file.close();
-        }
-        else {
-            cerr << "Ошибка открытия файла" << endl;
-        }
-    }
-
-    string botfunc() {
-        string result = "You always can use my special functions:\n";
-        while (!lfunc.empty()) {
-            result += lfunc.top() + "\n";
-            lfunc.pop();
-        }
-        return result;
-    }
-};
-
 int main() {
     setlocale(LC_ALL, "Russian");
     setlocale(LC_CTYPE, "");
 
-    FuncBot objFuncBot;
+    //идёт подключение функций бота Т9
     BotT9 bot;
 
-    string responses_file = "asw_scripts.txt";
+    string responses_file = "asw_scripts.txt"; // подключения скрипта с ответами бота
     unordered_map<string, string> responses = loadResponses(responses_file);
 
     crow::SimpleApp app;
 
+    // это html код бля сайта с ботом, тут ниже гет запрос для пользователя
+
     CROW_ROUTE(app, "/get_response").methods("GET"_method)(handleRequest);
-    CROW_ROUTE(app, "/")([&responses, &bot, &objFuncBot] {
+    CROW_ROUTE(app, "/")([&responses, &bot] {
         ostringstream os;
         os << "<!DOCTYPE html>\n"
             << "<html>\n"
@@ -211,24 +192,22 @@ int main() {
             << "        #user_input { width: 240px; }\n"
             << "    </style>\n"
             << "</head>\n"
-            << "<body>\n"
             << "    <h1>UTMN_Bot Chat</h1>\n"
-            << "    <div id=\"chat\">\n"
+            << "    <div id=\"chat\">\n" // приветственная фраза бота
             << "        <div>UTMN_Bot: Welcome, I'm UTMN_Bot. How can I help you?</div>\n"
-            //<< "        <div>UTMN_Bot: " << objFuncBot.botfunc() << "</div>\n"
             << "        <div>UTMN_Bot: If you need my help, please, text me 'help'.</div>\n"
             << "    </div>\n"
             << "    <input type=\"text\" id=\"user_input\" placeholder=\"Text message here\" />\n"
             << "    <button onclick=\"sendMessage()\">Send message</button>\n"
             << "    <script>\n"
-            << "        function sendMessage() {\n"
+            << "        function sendMessage() {\n" // тут идёт чтение и анализ сообщения пользвоателя
             << "            var userMessage = document.getElementById('user_input').value;\n"
             << "            var chat = document.getElementById('chat');\n"
             << "            var userMessageDiv = document.createElement('div');\n"
             << "            userMessageDiv.textContent = 'You: ' + userMessage;\n"
             << "            chat.appendChild(userMessageDiv);\n"
             << "            fetch('/chat', {\n"
-            << "                method: 'POST',\n"
+            << "                method: 'POST',\n" // отправка запроса с сообщением пользваотеля на сервер
             << "                headers: {\n"
             << "                    'Content-Type': 'application/json'\n"
             << "                },\n"
@@ -236,7 +215,7 @@ int main() {
             << "            }).then(response => response.json())\n"
             << "              .then(data => {\n"
             << "                var botMessageDiv = document.createElement('div');\n"
-            << "                botMessageDiv.textContent = 'UTMN_Bot: ' + data.response;\n"
+            << "                botMessageDiv.textContent = 'UTMN_Bot: ' + data.response;\n" // ответ сервера
             << "                chat.appendChild(botMessageDiv);\n"
             << "                document.getElementById('user_input').value = '';\n"
             << "            });\n"
@@ -247,19 +226,14 @@ int main() {
         return crow::response(os.str());
         });
 
-    CROW_ROUTE(app, "/chat").methods("POST"_method)([&responses, &bot, &objFuncBot](const crow::request& req) {
+    CROW_ROUTE(app, "/chat").methods("POST"_method)([&responses, &bot](const crow::request& req) {
         auto x = crow::json::load(req.body);
         if (!x)
             return crow::response(400);
-        string user_message = x["message"].s();
-
-        //objFuncBot.botfunc();
-
-        string response_message = generate_response(user_message, responses);
-        string similar_words_message = bot.findSimilarWords(user_message);
-        if (response_message == "UTMN_Bot: You always can use my special function 'help'.") {
-            response_message += "\n" + similar_words_message;
-        }
+        string user_message = x["message"].s(); // сообщение юзера
+        string response_message = generate_response(user_message, responses); // генерайция запроса на сервер
+        string similar_words_message = bot.findSimilarWords(user_message); // вызов функции Т9
+        response_message += "\n" + ("UTMN_Bot: " + similar_words_message);
         crow::json::wvalue response;
         response["response"] = response_message;
         return crow::response(response);
