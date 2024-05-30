@@ -1,7 +1,5 @@
 stipendiya 
-paid 
-salary 
+pay
+salary_theachers
 job 
 career 
-online studing
-help 
